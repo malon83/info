@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PersonaOS — AI Agent Builder Platform Verana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --brand:#E8622A;--brand-d:rgba(232,98,42,.15);--brand-m:rgba(232,98,42,.35);
+      --bg-0:#0F0F0D;--bg-1:#161614;--bg-2:#1E1E1B;--bg-3:#252522;--bg-4:#2C2C29;
+      --t0:#F0EDE8;--t1:#A09B94;--t2:#5C5851;
+      --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.13);
+      --green:#2ED573;--gdim:rgba(46,213,115,.12);
+      --blue:#3B8BEB;--bdim:rgba(59,139,235,.12);
+      --purple:#9B72CF;--pdim:rgba(155,114,207,.12);
+      --amber:#F4A836;--adim:rgba(244,168,54,.12);
+      --red:#FF5252;--rdim:rgba(255,82,82,.12);
+      --fn:'Syne',sans-serif;--fm:'Space Mono',monospace;
+    }
+    html,body{height:100%;background:var(--bg-0);color:var(--t0);font-family:var(--fn);overflow:hidden}
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:4px}
+
+    /* ── SCREENS ─────────────────────────────── */
+    .screen{display:none;position:fixed;inset:0;background:var(--bg-0);z-index:50}
+    .screen.active{display:flex}
+
+    /* ── LOGIN SCREEN ────────────────────────── */
+    #screen-login{flex-direction:column;align-items:center;justify-content:center;gap:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(232,98,42,.12) 0%,transparent 70%),var(--bg-0)}
+    .login-box{display:flex;flex-direction:column;align-items:center;gap:24px;padding:48px;
+      background:var(--bg-1);border:.5px solid var(--bdr2);border-radius:20px;width:100%;max-width:420px}
+    .login-logo{font-size:32px;font-weight:800;letter-spacing:.08em;color:var(--brand)}
+    .login-logo span{color:var(--t0)}
+    .login-sub{font-size:12px;color:var(--t2);font-family:var(--fm);text-align:center}
+    .login-divider{width:100%;height:.5px;background:var(--bdr2)}
+    .login-user{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg-2);
+      border:.5px solid var(--bdr2);border-radius:12px;width:100%}
+    .login-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
+    .login-avatar-placeholder{width:40px;height:40px;border-radius:50%;background:var(--brand-d);
+      display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+      padding:13px;background:var(--t0);color:#111;border:none;border-radius:10px;
+      font-family:var(--fn);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+    .btn-google:hover{opacity:.92}
+    .btn-google svg{flex-shrink:0}
+    .login-terms{font-size:10px;color:var(--t2);font-family:var(--fm);text-align:center;line-height:1.6}
+    .login-terms a{color:var(--blue);text-decoration:none}
+
+    /* ── APP SHELL ───────────────────────────── */
+    #screen-app{flex-direction:column}
+    .topnav{display:flex;align-items:center;gap:12px;padding:0 20px;height:50px;
+      border-bottom:.5px solid var(--bdr);background:var(--bg-1);flex-shrink:0;z-index:10}
+    .logo{font-size:14px;font-weight:800;letter-spacing:.1em;color:var(--brand)}
+    .logo sub{color:var(--t2);font-size:9px;font-family:var(--fm);display:block;letter-spacing:.06em;margin-top:-2px}
+    .sep{width:.5px;height:20px;background:var(--bdr2);flex-shrink:0}
+    .nav-tabs{display:flex;gap:2px;flex:1}
+    .ntab{background:none;border:none;color:var(--t1);padding:6px 12px;border-radius:6px;cursor:pointer;
+      font-family:var(--fn);font-size:12px;font-weight:600;transition:all .15s;white-space:nowrap}
+    .ntab:hover{color:var(--t0);background:var(--bg-2)}
+    .ntab.active{color:var(--brand);background:var(--brand-d)}
+    .ntab .badge{background:var(--brand);color:#fff;font-size:9px;font-family:var(--fm);padding:1px 5px;border-radius:8px;margin-left:5px}
+    .user-chip{display:flex;align-items:center;gap:8px;background:var(--bg-2);border:.5px solid var(--bdr);
+      border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;margin-left:auto;flex-shrink:0}
+    .chip-av{width:26px;height:26px;border-radius:50%;object-fit:cover}
+    .chip-av-ph{width:26px;height:26px;border-radius:50%;background:var(--brand-d);display:flex;align-items:center;justify-content:center;font-size:12px}
+    .chip-name{font-size:11px;font-weight:600;color:var(--t1)}
+    .chip-logout{background:none;border:none;color:var(--t2);font-size:11px;cursor:pointer;font-family:var(--fn);padding:0 0 0 4px}
+    .chip-logout:hover{color:var(--red)}
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .body{display:flex;flex:1;overflow:hidden}
+    .sidebar{width:192px;min-width:192px;background:var(--bg-1);border-right:.5px solid var(--bdr);
+      display:flex;flex-direction:column;padding:12px 10px;gap:2px;overflow-y:auto;flex-shrink:0}
+    .sl{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--t2);
+      padding:10px 8px 4px;text-transform:uppercase;font-family:var(--fm)}
+    .si{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;
+      font-size:12px;color:var(--t1);font-weight:600;border:.5px solid transparent;transition:all .15s}
+    .si:hover{background:var(--bg-2);color:var(--t0)}
+    .si.active{background:var(--brand-d);color:var(--brand);border-color:var(--brand-m)}
+    .si .ico{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+    .content{flex:1;overflow-y:auto;padding:24px 28px}
+    .page{display:none}
+    .page.visible{display:block;animation:fi .18s ease}
+    @keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+    /* ── PAGE HEADER ─────────────────────────── */
+    .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+    .pt{font-size:21px;font-weight:800}
+    .ps{font-size:11px;color:var(--t2);font-family:var(--fm);margin-top:3px}
+
+    /* ── BUTTONS ─────────────────────────────── */
+    .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:8px;
+      cursor:pointer;font-family:var(--fn);font-weight:700;letter-spacing:.02em;transition:all .15s}
+    .bp{background:var(--brand);color:#fff;padding:9px 18px;font-size:13px}
+    .bp:hover{opacity:.88}.bp:active{transform:scale(.97)}
+    .bg{background:none;border:.5px solid var(--bdr2);color:var(--t1);padding:8px 14px;font-size:12px}
+    .bg:hover{border-color:var(--brand);color:var(--brand)}
+    .bsm{padding:5px 11px;font-size:11px;border-radius:6px}
+    .bsuccess{background:none;border:.5px solid rgba(46,213,115,.3);color:var(--green);
+      padding:6px 12px;font-size:11px;border-radius:6px;cursor:pointer;font-family:var(--fn);font-weight:700;transition:all .15s}
+    .bsuccess:hover{background:var(--gdim)}
+    .bdanger{background:none;border:.5px solid rgba(255,82,82,.3);color:var(--red);
+      padding:6px 12px;font-size:11px;border-radius:6px;cursor:pointer;font-family:var(--fn);font-weight:700;transition:all .15s}
+    .bdanger:hover{background:var(--rdim)}
+
+    /* ── TAGS ────────────────────────────────── */
+    .tag{font-size:9px;font-weight:700;font-family:var(--fm);padding:3px 7px;border-radius:4px;white-space:nowrap}
+    .ton{background:var(--gdim);color:var(--green)}
+    .toff{background:var(--bg-3);color:var(--t2);border:.5px solid var(--bdr)}
+    .tmod{background:var(--brand-d);color:var(--brand)}
+    .tblue{background:var(--bdim);color:var(--blue)}
+    .tpurple{background:var(--pdim);color:var(--purple)}
+    .tamber{background:var(--adim);color:var(--amber)}
+
+    /* ── CARDS ───────────────────────────────── */
+    .grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:14px}
+    .card{background:var(--bg-2);border:.5px solid var(--bdr);border-radius:14px;
+      padding:20px;cursor:pointer;transition:border-color .15s,background .15s;
+      position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--brand))}
+    .card:hover{border-color:var(--bdr2);background:var(--bg-3)}
+    .card-av{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:13px}
+    .card-name{font-size:15px;font-weight:800}
+    .card-role{font-size:10px;color:var(--brand);font-family:var(--fm);margin-top:2px;margin-bottom:9px}
+    .card-desc{font-size:12px;color:var(--t1);line-height:1.55}
+    .card-meta{display:flex;align-items:center;gap:6px;margin-top:13px;padding-top:11px;border-top:.5px solid var(--bdr);flex-wrap:wrap}
+
+    /* ── FORM ────────────────────────────────── */
+    .fsec{background:var(--bg-2);border:.5px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:14px}
+    .ftit{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--t2);text-transform:uppercase;
+      font-family:var(--fm);margin-bottom:16px;padding-bottom:10px;border-bottom:.5px solid var(--bdr)}
+    .frow{margin-bottom:13px}
+    .frow:last-child{margin-bottom:0}
+    .flbl{font-size:11px;color:var(--t1);margin-bottom:6px;display:block;font-weight:600}
+    .flbl .hint{font-weight:400;color:var(--t2);font-family:var(--fm);font-size:10px}
+    .fin,.fta,.fsel{width:100%;background:var(--bg-1);border:.5px solid var(--bdr2);border-radius:7px;
+      color:var(--t0);font-family:var(--fn);font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s}
+    .fin:focus,.fta:focus,.fsel:focus{border-color:var(--brand)}
+    .fta{resize:vertical;min-height:90px;line-height:1.6;font-family:var(--fm);font-size:12px}
+    .fsel option{background:var(--bg-2)}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* ── WIZARD ──────────────────────────────── */
+    .wizard{display:flex;margin-bottom:26px;position:relative}
+    .wizard::before{content:'';position:absolute;top:16px;left:18px;right:18px;height:.5px;background:var(--bdr2);z-index:0}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;position:relative;z-index:1;cursor:pointer}
+    .sdot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:.5px solid var(--bdr2);background:var(--bg-2);color:var(--t2);transition:all .2s;font-family:var(--fm)}
+    .step-item.done .sdot{background:var(--brand-d);border-color:var(--brand);color:var(--brand)}
+    .step-item.active .sdot{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 14px rgba(232,98,42,.4)}
+    .slbl{font-size:9px;color:var(--t2);font-weight:600;text-align:center;font-family:var(--fm);letter-spacing:.03em}
+    .step-item.active .slbl{color:var(--brand)}
+    .step-item.done .slbl{color:var(--t1)}
+
+    /* ── PROVIDER TABS ───────────────────────── */
+    .pvtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+    .pvtab{display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;
+      border:.5px solid var(--bdr2);cursor:pointer;font-size:12px;font-weight:700;color:var(--t1);transition:all .15s}
+    .pvtab:hover{color:var(--t0);background:var(--bg-3)}
+    .pvtab.sel{border-color:var(--pc,var(--brand));color:var(--pc,var(--brand));background:var(--pb,var(--brand-d))}
+    .pvtab .dot{width:7px;height:7px;border-radius:50%;background:var(--pc,var(--brand))}
+    .pmodels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:7px;margin-top:10px}
+    .mopt{padding:10px 12px;border-radius:8px;border:.5px solid var(--bdr2);cursor:pointer;transition:all .15s;background:var(--bg-1)}
+    .mopt:hover{background:var(--bg-3)}
+    .mopt.sel{border-color:var(--brand);background:var(--brand-d)}
+    .mname{font-size:12px;font-weight:700}
+    .mdesc{font-size:10px;color:var(--t2);font-family:var(--fm);margin-top:2px}
+
+    /* ── MCP ─────────────────────────────────── */
+    .mcp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(162px,1fr));gap:7px}
+    .mcp-item{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:8px;
+      border:.5px solid var(--bdr);background:var(--bg-1);cursor:pointer;transition:all .15s}
+    .mcp-item:hover{border-color:var(--bdr2);background:var(--bg-2)}
+    .mcp-item.on{border-color:var(--green);background:var(--gdim)}
+    .toggle{width:28px;height:16px;border-radius:8px;background:var(--bg-3);border:.5px solid var(--bdr);
+      position:relative;margin-left:auto;transition:background .2s;flex-shrink:0}
+    .toggle.on{background:var(--green);border-color:var(--green)}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;
+      border-radius:50%;background:var(--t2);transition:transform .2s,background .2s}
+    .toggle.on::after{transform:translateX(12px);background:#fff}
+
+    /* ── EMOJI ───────────────────────────────── */
+    .egrid{display:flex;gap:6px;flex-wrap:wrap}
+    .eopt{font-size:21px;cursor:pointer;padding:6px;border-radius:7px;border:.5px solid var(--bdr);transition:border-color .12s}
+    .eopt:hover{border-color:var(--brand-m)}
+    .eopt.sel{border:1.5px solid var(--brand);background:var(--brand-d)}
+
+    /* ── HOLOGRAM PANEL ──────────────────────── */
+    .hpanel{background:var(--bg-1);border:.5px solid var(--bdr2);border-radius:14px;overflow:hidden}
+    .hhdr{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg-2);border-bottom:.5px solid var(--bdr)}
+    .hdot{width:8px;height:8px;border-radius:50%;background:var(--t2);transition:background .3s}
+    .hdot.on{background:var(--green);box-shadow:0 0 8px rgba(46,213,115,.6);animation:pglow 2s infinite}
+    .hdot.pend{background:var(--amber);animation:blink .8s step-end infinite}
+    @keyframes pglow{0%,100%{box-shadow:0 0 6px rgba(46,213,115,.5)}50%{box-shadow:0 0 14px rgba(46,213,115,.9)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hbody{display:grid;grid-template-columns:210px 1fr}
+    .qrpanel{padding:18px;border-right:.5px solid var(--bdr);display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--bg-0)}
+    .qrframe{width:172px;height:172px;background:var(--bg-2);border:.5px solid var(--bdr);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .qrph{font-size:10px;color:var(--t2);font-family:var(--fm);text-align:center;padding:14px;line-height:1.6}
+    .qrimg{width:172px;height:172px;border-radius:10px;image-rendering:pixelated}
+    .infopanel{padding:18px;display:flex;flex-direction:column;gap:0}
+    .irow{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:.5px solid var(--bdr)}
+    .irow:last-child{border-bottom:none}
+    .ikey{font-size:10px;color:var(--t2);font-family:var(--fm);flex-shrink:0;padding-top:2px}
+    .ival{font-size:12px;color:var(--t0);font-weight:600;text-align:right;word-break:break-all}
+    .ival.mono{font-family:var(--fm);font-size:10px;color:var(--blue)}
+    .ival.on{color:var(--green)}
+    .ival.off{color:var(--t2)}
+
+    /* ── AGENT PACK PREVIEW ──────────────────── */
+    .pkprev{background:var(--bg-0);border:.5px solid var(--bdr);border-radius:8px;padding:14px;
+      font-family:var(--fm);font-size:11px;line-height:1.75;color:#8B949E;white-space:pre;overflow-x:auto;max-height:300px;overflow-y:auto}
+
+    /* ── CHAT ────────────────────────────────── */
+    .cwrap{display:flex;flex-direction:column;background:var(--bg-1);border:.5px solid var(--bdr);
+      border-radius:14px;overflow:hidden;height:calc(100vh - 280px);min-height:340px}
+    .chdr{display:flex;align-items:center;gap:11px;padding:12px 18px;border-bottom:.5px solid var(--bdr);background:var(--bg-2);flex-shrink:0}
+    .cmsgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+    .mu{align-self:flex-end;max-width:80%}
+    .ma{align-self:flex-start;max-width:80%}
+    .bu{background:var(--bg-3);padding:9px 13px;border-radius:12px 12px 2px 12px;font-size:13px;line-height:1.5}
+    .ba{background:var(--brand-d);border-left:2px solid var(--brand);padding:9px 13px;border-radius:2px 12px 12px 12px;font-size:13px;line-height:1.5}
+    .mt{font-size:9px;color:var(--t2);font-family:var(--fm);margin-top:3px;padding:0 2px}
+    .mu .mt{text-align:right}
+    .cfoot{padding:10px 14px;border-top:.5px solid var(--bdr);display:flex;gap:8px;background:var(--bg-2);flex-shrink:0}
+    .cin{flex:1;background:var(--bg-1);border:.5px solid var(--bdr2);border-radius:8px;color:var(--t0);
+      font-family:var(--fn);font-size:13px;padding:9px 13px;outline:none}
+    .cin:focus{border-color:var(--brand)}
+    .sbtn{background:var(--brand);border:none;border-radius:8px;color:#fff;padding:9px 16px;
+      font-family:var(--fn);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+    .sbtn:disabled{opacity:.3;cursor:not-allowed}
+    .apills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .apill{display:flex;align-items:center;gap:6px;background:var(--bg-2);border:.5px solid var(--bdr);
+      border-radius:20px;padding:5px 12px;font-size:12px;color:var(--t1);cursor:pointer;transition:all .15s}
+    .apill:hover{border-color:var(--brand-m);color:var(--t0)}
+    .apill.sel{background:var(--brand-d);border-color:var(--brand);color:var(--brand)}
+
+    /* ── TOAST ───────────────────────────────── */
+    #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+      background:var(--bg-1);border:.5px solid var(--bdr2);border-radius:10px;
+      padding:12px 22px;font-size:13px;color:var(--t0);z-index:200;
+      opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+    #toast.show{opacity:1}
+
+    /* ── LOADING ─────────────────────────────── */
+    #loading-overlay{position:fixed;inset:0;background:var(--bg-0);z-index:80;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+    .spin{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── TYPING ──────────────────────────────── */
+    @keyframes pls{0%,100%{opacity:.3}50%{opacity:1}}
+    .typing{display:inline-flex;gap:3px;align-items:center}
+    .typing span{width:5px;height:5px;background:var(--brand);border-radius:50%;animation:pls 1.2s ease-in-out infinite}
+    .typing span:nth-child(2){animation-delay:.2s}
+    .typing span:nth-child(3){animation-delay:.4s}
+
+    /* ── EMPTY ───────────────────────────────── */
+    .empty{text-align:center;padding:56px 24px}
+    .eico{font-size:40px;margin-bottom:12px;opacity:.3}
+    .et{font-size:15px;color:var(--t1);font-weight:700}
+    .es{font-size:11px;color:var(--t2);font-family:var(--fm);margin-top:5px}
+
+    /* ── SETTINGS ────────────────────────────── */
+    .srow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:.5px solid var(--bdr)}
+    .srow:last-child{border-bottom:none}
+    .slabel{font-size:13px;font-weight:600}
+    .sdesc{font-size:10px;color:var(--t2);font-family:var(--fm);margin-top:2px}
+
+    /* ── API STATUS ──────────────────────────── */
+    .api-status-bar{display:flex;align-items:center;gap:8px;padding:8px 20px;background:var(--bg-2);
+      border-bottom:.5px solid var(--bdr);font-size:10px;font-family:var(--fm);flex-shrink:0}
+    .api-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .api-dot.ok{background:var(--green)}
+    .api-dot.err{background:var(--red)}
+    .api-dot.checking{background:var(--amber);animation:blink .8s step-end infinite}
+
+    @media(max-width:900px){.sidebar{display:none}}
+    @media(max-width:640px){.content{padding:14px}.hbody{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spin"></div>
+  <div style="font-size:12px;color:var(--t2);font-family:var(--fm)">// inicializando PersonaOS...</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SCREEN: LOGIN                                  -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <div style="text-align:center">
+      <div class="login-logo">PERSONA<span>OS</span></div>
+      <div style="font-size:11px;color:var(--t2);font-family:var(--fm);margin-top:4px">AI Agent Builder Platform Verana</div>
+    </div>
+    <div class="login-divider"></div>
+    <div style="text-align:center">
+      <div style="font-size:16px;font-weight:800;margin-bottom:6px">Bienvenido</div>
+      <div style="font-size:12px;color:var(--t1)">Accede con tu cuenta de Google para crear y gestionar tus Persona AI Agents verificables en Hologram.</div>
+    </div>
+
+    <!-- Session previa detectada -->
+    <div id="prev-user-block" style="display:none;width:100%">
+      <div class="login-user" id="prev-user-card">
+        <div class="login-avatar-placeholder" id="prev-av">👤</div>
+        <div>
+          <div style="font-size:13px;font-weight:700" id="prev-name">Usuario</div>
+          <div style="font-size:11px;color:var(--t2);font-family:var(--fm)" id="prev-email">—</div>
+        </div>
+        <button class="btn bp bsm" style="margin-left:auto" onclick="enterAppFromSession()">Continuar →</button>
+      </div>
+      <div style="font-size:11px;color:var(--t2);text-align:center;margin-top:8px">
+        ¿No eres tú? <span style="color:var(--blue);cursor:pointer" onclick="clearSession()">Usar otra cuenta</span>
+      </div>
+    </div>
+
+    <button class="btn-google" id="google-btn" onclick="loginWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continuar con Google
+    </button>
+
+    <div class="login-terms">
+      Al continuar aceptas los <a href="https://verana.io/terms" target="_blank">Términos de Servicio</a> de Verana Foundation y la política de identidades verificables del Reto EAFIT.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SCREEN: APP                                    -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="screen-app" class="screen">
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="logo">PERSONA<span style="color:var(--t0)">OS</span><sub>AI Agent Builder Platform Verana</sub></div>
+    <div class="sep"></div>
+    <div class="nav-tabs">
+      <button class="ntab active" onclick="showPage('bots')">Mis Bots <span class="badge" id="bot-count">0</span></button>
+      <button class="ntab" onclick="showPage('create')">+ Crear</button>
+      <button class="ntab" onclick="showPage('connect')">⬡ Hologram</button>
+      <button class="ntab" onclick="showPage('chat')">Chat</button>
+      <button class="ntab" onclick="showPage('settings')">⚙</button>
+    </div>
+    <div class="user-chip" id="user-chip">
+      <div class="chip-av-ph" id="chip-av">👤</div>
+      <span class="chip-name" id="chip-name">Usuario</span>
+      <button class="chip-logout" onclick="logout()" title="Cerrar sesión">✕</button>
+    </div>
+  </nav>
+
+  <!-- API STATUS BAR -->
+  <div class="api-status-bar">
+    <div class="api-dot checking" id="api-dot"></div>
+    <span id="api-status-txt" style="color:var(--t2)">Conectando con eafit-challenge-back.onrender.com...</span>
+    <span style="margin-left:auto;color:var(--t2)">Backend: <span style="color:var(--blue)">eafit-challenge-back.onrender.com</span></span>
+  </div>
+
+  <div class="body">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sl">Workspace</div>
+      <div class="si active" onclick="showPage('bots')"><span class="ico">◈</span>Mis Bots</div>
+      <div class="si" onclick="showPage('create')"><span class="ico">✦</span>Crear Bot</div>
+      <div class="si" onclick="showPage('connect')"><span class="ico">⬡</span>Hologram</div>
+      <div class="si" onclick="showPage('chat')"><span class="ico">💬</span>Chat API</div>
+      <div class="si" onclick="showPage('public')"><span class="ico">🌐</span>Agentes públicos</div>
+      <div class="si" onclick="showPage('settings')"><span class="ico">⚙</span>Config</div>
+      <div class="sl" style="margin-top:12px">Plantillas</div>
+      <div class="si" onclick="loadTemplate('plomero')"><span class="ico">🔧</span>Plomero</div>
+      <div class="si" onclick="loadTemplate('abogado')"><span class="ico">⚖️</span>Abogado</div>
+      <div class="si" onclick="loadTemplate('medico')"><span class="ico">🩺</span>Médico</div>
+      <div class="si" onclick="loadTemplate('dev')"><span class="ico">💻</span>Dev</div>
+      <div class="si" onclick="loadTemplate('coach')"><span class="ico">🎯</span>Coach</div>
+    </aside>
+
+    <main class="content">
+
+      <!-- PAGE: BOTS -->
+      <div id="page-bots" class="page visible">
+        <div class="ph">
+          <div><div class="pt">Mis Persona AI Agents</div><div class="ps">// sincronizado con eafit-challenge-back.onrender.com</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn bg bsm" onclick="loadBots()">↺ Sync</button>
+            <button class="btn bp" onclick="showPage('create')">✦ Nuevo Bot</button>
+          </div>
+        </div>
+        <div id="bots-loading" style="display:none;text-align:center;padding:40px;color:var(--t2);font-family:var(--fm);font-size:11px">
+          <div class="spin" style="margin:0 auto 12px"></div>cargando agentes...
+        </div>
+        <div class="grid3" id="bots-grid"></div>
+      </div>
+
+      <!-- PAGE: PUBLIC AGENTS -->
+      <div id="page-public" class="page">
+        <div class="ph"><div><div class="pt">Agentes Públicos</div><div class="ps">// directorio de Persona AI Agents verificados en Hologram Network</div></div>
+          <button class="btn bg bsm" onclick="loadPublicAgents()">↺ Refresh</button>
+        </div>
+        <div class="grid3" id="public-grid">
+          <div class="empty" style="grid-column:1/-1"><div class="eico">🌐</div><div class="et">Cargando agentes públicos...</div></div>
+        </div>
+      </div>
+
+      <!-- PAGE: CREATE -->
+      <div id="page-create" class="page">
+        <div class="ph">
+          <div><div class="pt">Crear Persona AI Agent</div><div class="ps">// se sincronizará con el backend EAFIT</div></div>
+          <button class="btn bg" onclick="showPage('bots')">← Volver</button>
+        </div>
+        <div class="wizard" id="wizard">
+          <div class="step-item active" onclick="goStep(0)"><div class="sdot">01</div><div class="slbl">Identidad</div></div>
+          <div class="step-item" onclick="goStep(1)"><div class="sdot">02</div><div class="slbl">Modelo IA</div></div>
+          <div class="step-item" onclick="goStep(2)"><div class="sdot">03</div><div class="slbl">Prompt</div></div>
+          <div class="step-item" onclick="goStep(3)"><div class="sdot">04</div><div class="slbl">MCP Tools</div></div>
+          <div class="step-item" onclick="goStep(4)"><div class="sdot">05</div><div class="slbl">Agent Pack</div></div>
+        </div>
+
+        <!-- STEP 0: IDENTIDAD -->
+        <div id="step-0" class="step-panel">
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+            <div>
+              <div class="fsec">
+                <div class="ftit">Persona Credential</div>
+                <div class="frow"><label class="flbl">Nombre completo</label><input class="fin" id="f-name" placeholder="Ej: Juan Pérez" oninput="syncPreview()"></div>
+                <div class="frow"><label class="flbl">Profesión / Título</label><input class="fin" id="f-prof" placeholder="Ej: Plomero certificado..." oninput="syncPreview()"></div>
+                <div class="frow"><label class="flbl">Descripción breve</label><textarea class="fta" id="f-desc" placeholder="Describe al agente..." style="min-height:60px" oninput="syncPreview()"></textarea></div>
+                <div class="frow"><label class="flbl">Avatar</label>
+                  <div class="egrid" id="emoji-picker">
+                    <span class="eopt sel" onclick="selEmoji(this,'👨‍🔧')">👨‍🔧</span>
+                    <span class="eopt" onclick="selEmoji(this,'👩‍💼')">👩‍💼</span>
+                    <span class="eopt" onclick="selEmoji(this,'⚖️')">⚖️</span>
+                    <span class="eopt" onclick="selEmoji(this,'🩺')">🩺</span>
+                    <span class="eopt" onclick="selEmoji(this,'🧠')">🧠</span>
+                    <span class="eopt" onclick="selEmoji(this,'💻')">💻</span>
+                    <span class="eopt" onclick="selEmoji(this,'📊')">📊</span>
+                    <span class="eopt" onclick="selEmoji(this,'🎯')">🎯</span>
+                    <span class="eopt" onclick="selEmoji(this,'🚀')">🚀</span>
+                    <span class="eopt" onclick="selEmoji(this,'🔬')">🔬</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fsec">
+                <div class="ftit">Service Credential</div>
+                <div class="fg2">
+                  <div class="frow"><label class="flbl">Nombre del servicio</label><input class="fin" id="f-svc" placeholder="Agenda Plomería JP"></div>
+                  <div class="frow"><label class="flbl">Slug <span class="hint">// URL pública</span></label><input class="fin" id="f-slug" placeholder="juan-perez" oninput="syncPreview()"></div>
+                </div>
+                <div class="frow"><label class="flbl">Categoría</label>
+                  <select class="fsel" id="f-cat">
+                    <option>Servicios del hogar</option><option>Legal y jurídico</option>
+                    <option>Salud</option><option>Tecnología</option><option>Educación</option>
+                    <option>Finanzas</option><option>Otro</option>
+                  </select>
+                </div>
+                <div class="frow"><label class="flbl">¿Público? <span class="hint">// visible en el directorio</span></label>
+                  <select class="fsel" id="f-public">
+                    <option value="true">Sí — aparece en directorio público</option>
+                    <option value="false">No — solo yo puedo verlo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- PREVIEW -->
+            <div style="position:sticky;top:0">
+              <div class="fsec" style="background:var(--bg-1)">
+                <div class="ftit">// preview Hologram</div>
+                <div style="background:var(--bg-2);border:.5px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:10px">
+                  <div id="pv-av" style="font-size:26px;margin-bottom:9px">👨‍🔧</div>
+                  <div id="pv-name" style="font-size:15px;font-weight:800">Nuevo Agente</div>
+                  <div id="pv-role" style="font-size:10px;color:var(--brand);font-family:var(--fm);margin-top:2px">Sin profesión</div>
+                </div>
+                <div style="background:var(--bg-0);border-radius:7px;padding:10px 12px;font-size:10px;font-family:var(--fm)">
+                  <div style="color:var(--t1);font-weight:700;margin-bottom:4px">Hologram URL</div>
+                  <div id="pv-url" style="color:var(--blue);word-break:break-all">— configura slug</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:6px">
+            <button class="btn bp" onclick="goStep(1)">Siguiente → Modelo IA</button>
+          </div>
+        </div>
+
+        <!-- STEP 1: MODELO -->
+        <div id="step-1" class="step-panel" style="display:none">
+          <div class="fsec">
+            <div class="ftit">Proveedor LLM</div>
+            <div class="pvtabs">
+              <div class="pvtab sel" style="--pc:#E8622A;--pb:rgba(232,98,42,.14)" onclick="selProvider(this,'anthropic')"><div class="dot"></div>Anthropic</div>
+              <div class="pvtab" style="--pc:#19C37D;--pb:rgba(25,195,125,.12)" onclick="selProvider(this,'openai')"><div class="dot" style="background:#19C37D"></div>OpenAI</div>
+              <div class="pvtab" style="--pc:#3B8BEB;--pb:rgba(59,139,235,.12)" onclick="selProvider(this,'ollama')"><div class="dot" style="background:#3B8BEB"></div>Ollama (local)</div>
+            </div>
+            <div id="pmodels-anthropic">
+              <div class="pmodels">
+                <div class="mopt sel" onclick="selModel(this,'claude-sonnet-4-20250514')"><div class="mname">claude-4.6-sonnet</div><div class="mdesc">Recomendado</div></div>
+                <div class="mopt" onclick="selModel(this,'claude-opus-4-20250514')"><div class="mname">claude-opus-4</div><div class="mdesc">Máxima capacidad</div></div>
+                <div class="mopt" onclick="selModel(this,'claude-haiku-4-5-20251001')"><div class="mname">claude-haiku-4.5</div><div class="mdesc">Rápido</div></div>
+              </div>
+              <div class="frow" style="margin-top:12px"><label class="flbl">Anthropic API Key</label><input class="fin" id="f-ant-key" type="password" placeholder="sk-ant-api03-..."></div>
+            </div>
+            <div id="pmodels-openai" style="display:none">
+              <div class="pmodels">
+                <div class="mopt sel" onclick="selModel(this,'gpt-4o-mini')"><div class="mname">gpt-5.4-mini</div><div class="mdesc">Recomendado</div></div>
+                <div class="mopt" onclick="selModel(this,'gpt-4o')"><div class="mname">gpt-4o</div><div class="mdesc">Multimodal</div></div>
+                <div class="mopt" onclick="selModel(this,'o3-mini')"><div class="mname">o3-mini</div><div class="mdesc">Razonamiento</div></div>
+              </div>
+              <div class="frow" style="margin-top:12px"><label class="flbl">OpenAI API Key</label><input class="fin" id="f-oai-key" type="password" placeholder="sk-..."></div>
+            </div>
+            <div id="pmodels-ollama" style="display:none">
+              <div style="background:var(--bdim);border:.5px solid rgba(59,139,235,.2);border-radius:8px;padding:10px 13px;margin-bottom:10px;font-size:11px;color:var(--blue);font-family:var(--fm)">// Ollama corre localmente · ARM64 compatible · sin costo</div>
+              <div class="pmodels">
+                <div class="mopt sel" onclick="selModel(this,'llama3')"><div class="mname">llama3</div><div class="mdesc">4.7 GB</div></div>
+                <div class="mopt" onclick="selModel(this,'mistral')"><div class="mname">mistral</div><div class="mdesc">4.1 GB</div></div>
+                <div class="mopt" onclick="selModel(this,'qwen2.5')"><div class="mname">qwen2.5</div><div class="mdesc">Español</div></div>
+                <div class="mopt" onclick="selModel(this,'deepseek-r1')"><div class="mname">deepseek-r1</div><div class="mdesc">Razonamiento</div></div>
+                <div class="mopt" onclick="selModel(this,'phi4')"><div class="mname">phi4</div><div class="mdesc">2.3 GB ligero</div></div>
+              </div>
+              <div class="frow" style="margin-top:10px"><label class="flbl">Ollama URL</label><input class="fin" id="f-ollama-url" value="http://localhost:11434"></div>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="ftit">Parámetros</div>
+            <div class="fg2">
+              <div class="frow">
+                <label class="flbl">Temperatura &nbsp;<span id="temp-val" style="color:var(--brand);font-family:var(--fm)">0.7</span></label>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:10px;color:var(--t2);font-family:var(--fm)">preciso</span>
+                  <input type="range" style="flex:1;accent-color:var(--brand)" id="f-temp" min="0" max="10" value="7" oninput="document.getElementById('temp-val').textContent=(this.value/10).toFixed(1)">
+                  <span style="font-size:10px;color:var(--t2);font-family:var(--fm)">creativo</span>
+                </div>
+              </div>
+              <div class="frow"><label class="flbl">Max tokens</label>
+                <select class="fsel" id="f-maxtok"><option value="512">512</option><option value="1024" selected>1024</option><option value="2048">2048</option></select>
+              </div>
+              <div class="frow"><label class="flbl">Idioma</label>
+                <select class="fsel" id="f-lang"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option></select>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <button class="btn bg" onclick="goStep(0)">← Atrás</button>
+            <button class="btn bp" onclick="goStep(2)">Siguiente → Prompt</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: PROMPT -->
+        <div id="step-2" class="step-panel" style="display:none">
+          <div class="fsec">
+            <div class="ftit">System Prompt</div>
+            <div class="frow"><textarea class="fta" id="f-prompt" style="min-height:140px" placeholder="Eres Juan Pérez, plomero certificado con 10 años de experiencia. Ayuda a los clientes a agendar citas y responder preguntas. Sé amigable y profesional."></textarea></div>
+            <div class="frow"><label class="flbl">Saludo inicial</label><input class="fin" id="f-greeting" placeholder="¡Hola! Soy el asistente de Juan Pérez. ¿En qué te ayudo?"></div>
+            <div class="frow"><label class="flbl">Tono</label>
+              <select class="fsel" id="f-tone">
+                <option value="profesional">Profesional</option><option value="amigable">Amigable</option>
+                <option value="tecnico">Técnico</option><option value="empatico">Empático</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+              <button class="btn bg bsm" onclick="fillP('agenda')">📅 Agendamiento</button>
+              <button class="btn bg bsm" onclick="fillP('faq')">❓ FAQ</button>
+              <button class="btn bg bsm" onclick="fillP('ventas')">💼 Ventas</button>
+              <button class="btn bg bsm" onclick="fillP('asesor')">🧑‍⚖️ Asesor</button>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <button class="btn bg" onclick="goStep(1)">← Atrás</button>
+            <button class="btn bp" onclick="goStep(3)">Siguiente → MCP</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: MCP -->
+        <div id="step-3" class="step-panel" style="display:none">
+          <div class="fsec">
+            <div class="ftit">MCP Services <span class="tamber" style="margin-left:6px">mínimo 2</span></div>
+            <div class="mcp-grid" id="mcp-grid"></div>
+          </div>
+          <div class="fsec" id="mcp-cfg"><div class="ftit">Tokens MCP</div><div style="font-size:12px;color:var(--t2);font-family:var(--fm)">// activa herramientas arriba</div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <button class="btn bg" onclick="goStep(2)">← Atrás</button>
+            <button class="btn bp" onclick="goStep(4)">Siguiente → Agent Pack</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: AGENT PACK + SAVE -->
+        <div id="step-4" class="step-panel" style="display:none">
+          <div class="fsec">
+            <div class="ftit">agent-pack.yaml — generado</div>
+            <div id="pack-prev" class="pkprev"></div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn bg bsm" onclick="copyPack()">📋 Copiar YAML</button>
+              <button class="btn bg bsm" onclick="dlPack()">⬇ agent-pack.yaml</button>
+              <button class="btn bg bsm" onclick="dlEnv()">⬇ config.env</button>
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="ftit">config.env</div>
+            <div id="env-prev" class="pkprev"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <button class="btn bg" onclick="goStep(3)">← Atrás</button>
+            <button class="btn bp" id="save-bot-btn" style="background:var(--green);padding:11px 22px;font-size:14px" onclick="saveBot()">✓ Guardar en EAFIT Backend</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: HOLOGRAM CONNECT -->
+      <div id="page-connect" class="page">
+        <div class="ph"><div><div class="pt">⬡ Hologram Connect</div><div class="ps">// DIDComm · Verifiable Services · VS Agent</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="fsec">
+            <div class="ftit">Seleccionar agente</div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap" id="connect-pills"></div>
+          </div>
+          <div class="hpanel" id="hpanel" style="display:none">
+            <div class="hhdr">
+              <div style="font-size:18px" id="h-av">👨‍🔧</div>
+              <div><div style="font-size:14px;font-weight:700" id="h-name">—</div><div style="font-size:10px;color:var(--brand);font-family:var(--fm)" id="h-role">—</div></div>
+              <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+                <div class="hdot pend" id="h-dot"></div>
+                <span style="font-size:10px;color:var(--t1);font-family:var(--fm)" id="h-stxt">verificando...</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-left:12px">
+                <button class="btn bg bsm" onclick="refreshStatus()">↺</button>
+                <button class="bsuccess" id="pub-btn" onclick="publishBot()">↑ Publicar</button>
+                <button class="bdanger" id="unpub-btn" style="display:none" onclick="unpublishBot()">↓ Despublicar</button>
+              </div>
+            </div>
+            <div class="hbody">
+              <div class="qrpanel">
+                <div style="font-size:9px;color:var(--t2);font-family:var(--fm)">HOLOGRAM QR</div>
+                <div class="qrframe" id="qrframe">
+                  <div class="qrph" id="qrph">Publica el agente para obtener el QR</div>
+                  <img id="qrimg" class="qrimg" style="display:none" src="" alt="QR">
+                </div>
+                <div id="qrurl" style="display:none;font-size:10px;font-family:var(--fm);text-align:center;max-width:172px"></div>
+                <a href="https://hologram.zone" target="_blank" style="font-size:9px;color:var(--blue);font-family:var(--fm)">Hologram Messaging ↗</a>
+              </div>
+              <div class="infopanel">
+                <div class="irow"><span class="ikey">Estado</span><span class="ival off" id="i-status">No publicado</span></div>
+                <div class="irow"><span class="ikey">Public URL</span><span class="ival mono" id="i-url">—</span></div>
+                <div class="irow"><span class="ikey">VS Agent (admin)</span><span class="ival mono" id="i-admin">—</span></div>
+                <div class="irow"><span class="ikey">Provider LLM</span><span class="ival" id="i-prov">—</span></div>
+                <div class="irow"><span class="ikey">Modelo</span><span class="ival" id="i-model">—</span></div>
+                <div class="irow"><span class="ikey">MCP Tools</span><span class="ival" id="i-mcp">—</span></div>
+                <div class="irow"><span class="ikey">EAFIT CredDef</span><span class="ival" style="font-size:9px;font-family:var(--fm);color:var(--t2)">did:webvh:QmPZBr...eafit.testnet.verana.network</span></div>
+                <div style="margin-top:12px">
+                  <div style="font-size:9px;color:var(--t2);font-family:var(--fm);margin-bottom:8px">PASOS DE DESPLIEGUE</div>
+                  <div style="display:flex;flex-direction:column;gap:5px" id="deploy-steps">
+                    <div id="ds0"><span class="dsi">○</span> <span style="font-size:11px;color:var(--t1)">1. Setup VS Agent + Service Credential EAFIT</span></div>
+                    <div id="ds1"><span class="dsi">○</span> <span style="font-size:11px;color:var(--t1)">2. Iniciar stack Docker (chatbot + redis + postgres)</span></div>
+                    <div id="ds2"><span class="dsi">○</span> <span style="font-size:11px;color:var(--t1)">3. Exponer con ngrok / deploy en Kubernetes</span></div>
+                    <div id="ds3"><span class="dsi">○</span> <span style="font-size:11px;color:var(--t1)">4. Obtener Avatar Credential EAFIT en Hologram</span></div>
+                    <div id="ds4"><span class="dsi">○</span> <span style="font-size:11px;color:var(--t1)">5. Escanear QR con Hologram Messaging</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Quick start -->
+          <div class="fsec">
+            <div class="ftit">Quick Start — eafit-challenge-agent-example</div>
+            <div style="background:var(--bg-0);border-radius:8px;padding:14px;font-family:var(--fm);font-size:11px;line-height:1.9;color:#8B949E">
+              <div style="color:#6E7681"># 1. Clonar el fork (ya lo hiciste)</div>
+              <div style="color:#E6EDF3">$ git clone https://github.com/Danielsma803/eafit-challenge-agent-example.git</div>
+              <div style="color:#E6EDF3">$ cd eafit-challenge-agent-example</div>
+              <br>
+              <div style="color:#6E7681"># 2. Pegar archivos generados en Step 4 del wizard de PersonaOS</div>
+              <div style="color:#E6EDF3">$ cp ~/Downloads/agent-pack.yaml app/agent-packs/example-agent/agent-pack.yaml</div>
+              <div style="color:#E6EDF3">$ cp ~/Downloads/config.env .</div>
+              <br>
+              <div style="color:#6E7681"># 3. Setup: conecta con org EAFIT y obtiene Service Credential</div>
+              <div style="color:#22C55E">$ source config.env && ./scripts/setup.sh</div>
+              <div style="color:#6E7681">#    → VS Agent Admin: http://localhost:3010</div>
+              <div style="color:#6E7681">#    → VS Agent Public: http://localhost:3011  (exponer con ngrok)</div>
+              <br>
+              <div style="color:#6E7681"># 4. Iniciar stack Docker (chatbot:3003 + redis + postgres)</div>
+              <div style="color:#22C55E">$ export OPENAI_API_KEY=sk-...  # o ANTHROPIC_API_KEY</div>
+              <div style="color:#22C55E">$ ./scripts/start.sh</div>
+              <br>
+              <div style="color:#6E7681"># 5. Exponer puerto 3011 para Hologram (DIDComm público)</div>
+              <div style="color:#22C55E">$ ngrok http 3011</div>
+              <div style="color:#6E7681">#    → Copiar URL ngrok → actualizar AGENT_PUBLIC_URL en config.env</div>
+              <br>
+              <div style="color:#6E7681"># 6. Verificar servicios</div>
+              <div style="color:#E6EDF3">$ curl http://localhost:3010/agent-info   # VS Agent admin</div>
+              <div style="color:#E6EDF3">$ curl http://localhost:3003/health       # Chatbot</div>
+              <div style="color:#E6EDF3">$ curl http://localhost:3011              # VS Agent público (DIDComm)</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="https://example-agent.eafit.testnet.verana.network/" target="_blank" class="btn bg bsm">⬡ Agente ejemplo live ↗</a>
+            <a href="https://avatar.eafit.testnet.verana.network/" target="_blank" class="btn bg bsm">🪪 Avatar Credential ↗</a>
+            <a href="https://hologram.zone" target="_blank" class="btn bg bsm">📱 Hologram ↗</a>
+            <a href="https://github.com/Danielsma803/eafit-challenge-agent-example" target="_blank" class="btn bg bsm">🐙 GitHub ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: CHAT -->
+      <div id="page-chat" class="page">
+        <div class="ph"><div><div class="pt">Chat Directo (API)</div><div class="ps">// prueba bots via API · sin DIDComm</div></div></div>
+        <div class="apills" id="agent-pills"></div>
+        <div class="cwrap">
+          <div class="chdr">
+            <div style="font-size:20px" id="cv-av">⬡</div>
+            <div><div style="font-size:14px;font-weight:700" id="cv-name">Selecciona un agente</div><div style="font-size:10px;color:var(--brand);font-family:var(--fm)" id="cv-role">para comenzar</div></div>
+            <div style="width:7px;height:7px;background:var(--green);border-radius:50%;margin-left:auto;box-shadow:0 0 6px rgba(46,213,115,.5)"></div>
+          </div>
+          <div class="cmsgs" id="chat-msgs">
+            <div class="empty" style="padding:40px 16px"><div class="eico">⬡</div><div class="et">Selecciona un agente</div><div class="es">// chat directo via API · Anthropic · OpenAI · Ollama</div></div>
+          </div>
+          <div class="cfoot">
+            <input class="cin" id="chat-in" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}">
+            <button class="sbtn" id="send-btn" onclick="sendMsg()">→</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: SETTINGS -->
+      <div id="page-settings" class="page">
+        <div class="ph"><div><div class="pt">Configuración</div><div class="ps">// API keys, backend, Kubernetes</div></div></div>
+        <div style="max-width:620px;display:flex;flex-direction:column;gap:14px">
+          <div class="fsec">
+            <div class="ftit">Backend EAFIT (eafit-challenge-back.onrender.com)</div>
+            <div class="srow">
+              <div><div class="slabel">API Base URL</div><div class="sdesc">https://eafit-challenge-back.onrender.com/api/v1</div></div>
+              <div class="api-dot" id="sett-api-dot" style="width:8px;height:8px;border-radius:50%;background:var(--t2)"></div>
+            </div>
+            <div class="srow">
+              <div><div class="slabel">Google OAuth</div><div class="sdesc">/auth/google → JWT token</div></div>
+              <span class="ton tag">configurado</span>
+            </div>
+            <div class="frow" style="margin-top:12px"><label class="flbl">JWT Token <span class="hint">// auto desde Google OAuth</span></label>
+              <input class="fin" id="s-token" type="password" placeholder="eyJhbGci..." oninput="saveSettings()" style="font-family:var(--fm);font-size:11px">
+            </div>
+          </div>
+          <div class="fsec">
+            <div class="ftit">LLM API Keys</div>
+            <div class="frow"><label class="flbl">Anthropic</label><input class="fin" id="s-ant" type="password" placeholder="sk-ant-api03-..." oninput="saveSettings()"></div>
+            <div class="frow"><label class="flbl">OpenAI</label><input class="fin" id="s-oai" type="password" placeholder="sk-..." oninput="saveSettings()"></div>
+            <div class="frow"><label class="flbl">Ollama URL</label><input class="fin" id="s-ollama" placeholder="http://localhost:11434" oninput="saveSettings()"></div>
+          </div>
+          <div class="fsec">
+            <div class="ftit">Hologram / Kubernetes</div>
+            <div class="frow"><label class="flbl">Namespace</label><input class="fin" id="s-ns" placeholder="eafit-TUEQUIPO" oninput="saveSettings()"></div>
+            <div class="frow"><label class="flbl">Agent nameOverride <span class="hint">// deployment.yaml · ej: danielsampayo</span></label><input class="fin" id="s-agname" placeholder="danielsampayo" oninput="saveSettings()"></div>
+            <div class="frow"><label class="flbl">Base domain <span class="hint">// ej: team-c.teams.eafit.testnet.verana.network</span></label><input class="fin" id="s-domain" value="team-c.teams.eafit.testnet.verana.network" oninput="saveSettings()"></div>
+            <div class="frow"><label class="flbl">VS Agent Admin URL <span class="hint">// local: localhost:3010 · K8s: &lt;name&gt;-agent.&lt;ns&gt;:3000</span></label><input class="fin" id="s-vsadmin" value="http://localhost:3010" oninput="saveSettings()"></div>
+          </div>
+          <div class="fsec">
+            <div class="ftit">Links del Reto</div>
+            <div class="srow"><div><div class="slabel">Landing Page</div><div class="sdesc">landing-l4tx.onrender.com</div></div><button class="btn bg bsm" onclick="window.open('https://landing-l4tx.onrender.com/')">Abrir ↗</button></div>
+            <div class="srow"><div><div class="slabel">API Docs (Swagger)</div><div class="sdesc">eafit-challenge-back.onrender.com/api-docs</div></div><button class="btn bg bsm" onclick="window.open('https://eafit-challenge-back.onrender.com/api-docs')">Abrir ↗</button></div>
+            <div class="srow"><div><div class="slabel">Discord</div><div class="sdesc">discord.com/invite/edjaFn252q</div></div><button class="btn bg bsm" onclick="window.open('https://discord.com/invite/edjaFn252q')">Abrir ↗</button></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+const API   = 'https://eafit-challenge-back.onrender.com/api/v1';
+const LAND  = 'https://landing-l4tx.onrender.com';
+const CRED_DEF = 'did:webvh:QmPZBrmehNXxY4eRL2a9F52sCfkQfToPHM8R427sNS2F1N:avatar.eafit.testnet.verana.network/resources/zQmdzYfqKe6ypc9NbRMHbCFvgnrqCwbWjBK2odKYrRePaTu';
+const ORG_URL  = 'https://organization.eafit.testnet.verana.network';
+const ACCENTS  = ['#E8622A','#3B8BEB','#9B72CF','#2ED573','#F4A836','#FF5252','#00C9A7'];
+
+const MCP_CATALOG = [
+  {id:'google-calendar',name:'Google Calendar',icon:'📅',desc:'Citas',url:'https://calendarmcp.googleapis.com/mcp/v1'},
+  {id:'gmail',name:'Gmail',icon:'✉️',desc:'Emails',url:'https://gmailmcp.googleapis.com/mcp/v1'},
+  {id:'google-sheets',name:'Sheets',icon:'📊',desc:'Hojas de cálculo',url:'https://sheetsmcp.googleapis.com/mcp/v1'},
+  {id:'github',name:'GitHub',icon:'🐙',desc:'Repos',url:'https://api.githubcopilot.com/mcp/'},
+  {id:'wikipedia',name:'Wikipedia',icon:'📚',desc:'Buscar info',url:'https://mcp.wikipedia.org/v1'},
+  {id:'weather',name:'Weather',icon:'🌤️',desc:'Clima',url:'https://mcp.weather.com/v1'},
+  {id:'slack',name:'Slack',icon:'💼',desc:'Mensajes',url:'https://mcp.slack.com/v1'},
+  {id:'stripe',name:'Stripe',icon:'💳',desc:'Pagos',url:'https://mcp.stripe.com/v1'},
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let user = null;
+let jwtToken = null;
+let bots = [];
+let settings = {};
+let selEmoji_ = '👨‍🔧';
+let selProvider_ = 'anthropic';
+let selModel_ = 'claude-sonnet-4-20250514';
+let activeMCP = new Set();
+let chatAgent = null;
+let chatHistory = [];
+let connectAgent = null;
+let pollTimer = null;
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+async function init() {
+  loadSettings();
+
+  // Check for token in URL (after OAuth redirect from backend)
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
+  const urlUser  = params.get('user');
+
+  if (urlToken) {
+    jwtToken = urlToken;
+    try {
+      user = urlUser ? JSON.parse(decodeURIComponent(urlUser)) : await fetchMe(urlToken);
+    } catch(_) { user = null; }
+    if (user) {
+      saveSession(urlToken, user);
+      window.history.replaceState({}, '', window.location.pathname);
+      enterApp();
+      return;
+    }
+  }
+
+  // Check saved session
+  const saved = loadSession();
+  if (saved) {
+    jwtToken = saved.token;
+    // Validate token with backend
+    try {
+      user = await fetchMe(jwtToken);
+      if (user) { enterApp(); return; }
+    } catch(_) { clearSession(); }
+  }
+
+  showLogin();
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function loginWithGoogle() {
+  // Exact URL confirmed from landing-l4tx.onrender.com source code
+  // The landing's "Iniciar Sesión" button points to this same URL
+  const redirectBack = encodeURIComponent(window.location.href);
+  window.location.href = `${API}/auth/google?redirect=${redirectBack}`;
+}
+
+async function fetchMe(token) {
+  const r = await fetch(`${API}/auth/me`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!r.ok) throw new Error('invalid token');
+  const d = await r.json();
+  return d.user || d;
+}
+
+function saveSession(token, u) {
+  localStorage.setItem('personaos_token', token);
+  localStorage.setItem('personaos_user', JSON.stringify(u));
+}
+
+function loadSession() {
+  const token = localStorage.getItem('personaos_token');
+  const u = localStorage.getItem('personaos_user');
+  if (token && u) { return { token, user: JSON.parse(u) }; }
+  return null;
+}
+
+function clearSession() {
+  localStorage.removeItem('personaos_token');
+  localStorage.removeItem('personaos_user');
+  user = null; jwtToken = null;
+}
+
+function logout() {
+  clearSession();
+  showLogin();
+  toast('Sesión cerrada');
+}
+
+function enterAppFromSession() {
+  const saved = loadSession();
+  if (saved) { jwtToken = saved.token; user = saved.user; enterApp(); }
+}
+
+// ═══════════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ═══════════════════════════════════════════════════
+function showLogin() {
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+
+  // Check if there's a saved session to show "continue as"
+  const saved = loadSession();
+  if (saved?.user) {
+    const u = saved.user;
+    document.getElementById('prev-user-block').style.display = 'block';
+    document.getElementById('google-btn').style.display = 'none';
+    const av = document.getElementById('prev-av');
+    if (u.picture || u.avatar) {
+      const img = document.createElement('img');
+      img.src = u.picture || u.avatar;
+      img.className = 'login-avatar';
+      av.replaceWith(img);
+    } else { av.textContent = (u.name||'U')[0].toUpperCase(); }
+    document.getElementById('prev-name').textContent = u.name || 'Usuario';
+    document.getElementById('prev-email').textContent = u.email || '';
+  }
+}
+
+function enterApp() {
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  updateUserChip();
+  loadBots();
+  checkApiStatus();
+  renderMCPGrid();
+}
+
+function updateUserChip() {
+  if (!user) return;
+  const nameEl = document.getElementById('chip-name');
+  const avEl = document.getElementById('chip-av');
+  nameEl.textContent = (user.name || user.email || 'Usuario').split(' ')[0];
+  if (user.picture || user.avatar) {
+    const img = document.createElement('img');
+    img.src = user.picture || user.avatar;
+    img.className = 'chip-av';
+    avEl.replaceWith(img);
+  } else {
+    avEl.textContent = (user.name || 'U')[0].toUpperCase();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('visible'));
+  document.querySelectorAll('.ntab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.si').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('visible');
+  const ni = {bots:0,create:1,connect:2,chat:3,settings:4};
+  const si = ['bots','create','connect','chat','public','settings'];
+  if (ni[p]!==undefined) document.querySelectorAll('.ntab')[ni[p]]?.classList.add('active');
+  document.querySelectorAll('.si').forEach((el,i) => { if(si[i]===p) el.classList.add('active'); });
+  if (p==='chat') renderAgentPills();
+  if (p==='connect') renderConnectPills();
+  if (p==='public') loadPublicAgents();
+}
+
+// ═══════════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════════
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` };
+}
+
+async function apiFetch(path, opts = {}) {
+  const url = path.startsWith('http') ? path : `${API}${path}`;
+  const r = await fetch(url, { headers: authHeaders(), ...opts });
+  if (r.status === 401) { clearSession(); showLogin(); toast('Sesión expirada. Por favor inicia sesión de nuevo.'); throw new Error('unauthorized'); }
+  return r;
+}
+
+async function checkApiStatus() {
+  const dot = document.getElementById('api-dot');
+  const txt = document.getElementById('api-status-txt');
+  const sdot = document.getElementById('sett-api-dot');
+  dot.className = 'api-dot checking';
+  txt.style.color = 'var(--t2)';
+  txt.textContent = 'Conectando...';
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+    if (r.ok) {
+      dot.className = 'api-dot ok'; sdot.className = 'api-dot ok';
+      txt.style.color = 'var(--green)';
+      txt.textContent = '✓ eafit-challenge-back.onrender.com — conectado';
+    } else throw new Error();
+  } catch {
+    dot.className = 'api-dot err'; sdot.className = 'api-dot err';
+    txt.style.color = 'var(--red)';
+    txt.textContent = '✕ Backend no disponible — modo local activado';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// BOTS — CRUD con Backend EAFIT
+// ═══════════════════════════════════════════════════
+async function loadBots() {
+  document.getElementById('bots-loading').style.display = 'block';
+  document.getElementById('bots-grid').innerHTML = '';
+  try {
+    const r = await apiFetch('/agents');
+    if (r.ok) {
+      const d = await r.json();
+      bots = (d.agents || d.data || d || []).map(normalizeBot);
+    } else {
+      // fallback local
+      bots = JSON.parse(localStorage.getItem('personaos_bots') || '[]');
+    }
+  } catch {
+    bots = JSON.parse(localStorage.getItem('personaos_bots') || '[]');
+  }
+  document.getElementById('bots-loading').style.display = 'none';
+  renderBots();
+}
+
+async function loadPublicAgents() {
+  document.getElementById('public-grid').innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🌐</div><div class="et">Cargando agentes públicos...</div></div>';
+  try {
+    const r = await fetch(`${API}/agents/public`);
+    const d = r.ok ? await r.json() : [];
+    const agents = (d.agents || d.data || d || []);
+    if (!agents.length) {
+      document.getElementById('public-grid').innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🌐</div><div class="et">No hay agentes públicos aún</div><div class="es">// sé el primero en publicar tu Persona AI Agent</div></div>';
+      return;
+    }
+    document.getElementById('public-grid').innerHTML = agents.map(a => {
+      const b = normalizeBot(a);
+      return `<div class="card" style="--accent:${b.accent}">
+        <div class="card-av" style="background:${b.accent}22">${b.emoji}</div>
+        <div class="card-name">${b.name}</div>
+        <div class="card-role">${b.prof}</div>
+        <div class="card-desc">${b.desc}</div>
+        <div class="card-meta">
+          <span class="tag ton">● Público</span>
+          <span class="tag tmod">${provLabel(b.provider)}</span>
+          ${b.public_url?`<a href="${b.public_url}" target="_blank" class="btn bg bsm" style="margin-left:auto">⬡ Abrir ↗</a>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('public-grid').innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🌐</div><div class="et">Error al cargar agentes públicos</div><div class="es">// verifica la conexión con el backend</div></div>';
+  }
+}
+
+function normalizeBot(a) {
+  return {
+    id: a.id || a._id || Date.now(),
+    name: a.name || a.agentName || 'Agente',
+    prof: a.profession || a.title || a.prof || 'Agente IA',
+    emoji: a.emoji || a.avatar || '🤖',
+    slug: a.slug || a.name?.toLowerCase().replace(/[^a-z0-9]+/g,'-') || 'agente',
+    desc: a.description || a.desc || '',
+    svcName: a.serviceName || a.svcName || a.name || '',
+    cat: a.category || a.cat || 'General',
+    provider: a.provider || a.llmProvider || 'anthropic',
+    model: a.model || a.llmModel || 'claude-sonnet-4-20250514',
+    temp: a.temperature ?? a.temp ?? 0.7,
+    maxTokens: a.maxTokens || a.max_tokens || 1024,
+    lang: a.language || a.lang || 'es',
+    tone: a.tone || 'profesional',
+    prompt: a.systemPrompt || a.prompt || '',
+    greeting: a.greeting || a.greetingMessage || '',
+    mcp: a.mcpTools || a.mcp || [],
+    published: !!(a.published || a.isPublished),
+    public_url: a.publicUrl || a.public_url || null,
+    accent: a.accent || ACCENTS[Math.abs(hashStr(a.id||a.name||'x')) % ACCENTS.length],
+  };
+}
+
+function hashStr(s) {
+  let h = 0;
+  for(let i=0;i<s.length;i++) h = Math.imul(31,h)+s.charCodeAt(i)|0;
+  return h;
+}
+
+function renderBots() {
+  const g = document.getElementById('bots-grid');
+  document.getElementById('bot-count').textContent = bots.length;
+  localStorage.setItem('personaos_bots', JSON.stringify(bots));
+  if (!bots.length) {
+    g.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="eico">◈</div><div class="et">Sin agentes aún</div><div class="es">// crea tu primer Persona AI Agent</div></div>`;
+    return;
+  }
+  g.innerHTML = bots.map(b => `
+    <div class="card" style="--accent:${b.accent}" onclick="openConnect(${JSON.stringify(b.id)})">
+      <div class="card-av" style="background:${b.accent}22">${b.emoji}</div>
+      <div class="card-name">${b.name}</div>
+      <div class="card-role">${b.prof}</div>
+      <div class="card-desc">${escH(b.desc)}</div>
+      <div class="card-meta">
+        <span class="tag ${b.published?'ton':'toff'}">${b.published?'● Online':'○ Offline'}</span>
+        <span class="tag tmod">${provLabel(b.provider)}</span>
+        <span class="tag tblue">${shortModel(b.model)}</span>
+        <button class="btn bg bsm" style="margin-left:auto" onclick="event.stopPropagation();openChatBot(${JSON.stringify(b.id)})">Chat →</button>
+      </div>
+    </div>`).join('');
+}
+
+function provLabel(p) { return {anthropic:'Anthropic',openai:'OpenAI',ollama:'Ollama'}[p]||p; }
+function shortModel(m) {
+  if(!m) return '—';
+  if(m.includes('sonnet')) return 'Sonnet 4';
+  if(m.includes('opus')) return 'Opus 4';
+  if(m.includes('haiku')) return 'Haiku';
+  if(m.includes('gpt-4o-mini')||m.includes('5.4-mini')) return 'GPT-mini';
+  if(m.includes('gpt-4o')) return 'GPT-4o';
+  return m.split(':')[0].slice(0,12);
+}
+
+// ═══════════════════════════════════════════════════
+// CREATE WIZARD
+// ═══════════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.style.display = i===n?'block':'none');
+  document.querySelectorAll('.step-item').forEach((s,i) => {
+    s.classList.remove('active','done');
+    if(i<n) s.classList.add('done');
+    if(i===n) s.classList.add('active');
+  });
+  if(n===4) renderPackPreview();
+}
+
+function selProvider(el, p) {
+  document.querySelectorAll('.pvtab').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel'); selProvider_ = p;
+  ['anthropic','openai','ollama'].forEach(x => document.getElementById('pmodels-'+x).style.display = x===p?'block':'none');
+  const first = document.querySelector(`#pmodels-${p} .mopt`);
+  if(first) { document.querySelectorAll(`#pmodels-${p} .mopt`).forEach(m=>m.classList.remove('sel')); first.classList.add('sel'); }
+  if(p==='anthropic'&&settings.ant) document.getElementById('f-ant-key').value=settings.ant;
+  if(p==='openai'&&settings.oai) document.getElementById('f-oai-key').value=settings.oai;
+}
+
+function selModel(el, model) {
+  el.closest('.pmodels').querySelectorAll('.mopt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel'); selModel_ = model;
+}
+
+function selEmoji(el, emoji) {
+  document.querySelectorAll('.eopt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel'); selEmoji_ = emoji; syncPreview();
+}
+
+function syncPreview() {
+  const name = document.getElementById('f-name')?.value || 'Nuevo Agente';
+  const prof = document.getElementById('f-prof')?.value || 'Sin profesión';
+  const slug = document.getElementById('f-slug')?.value || '';
+  document.getElementById('pv-av').textContent = selEmoji_;
+  document.getElementById('pv-name').textContent = name;
+  document.getElementById('pv-role').textContent = prof;
+  const domain = settings.domain || 'agents.team-c.teams.eafit.testnet.verana.network';
+  const s = slug || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  document.getElementById('pv-url').textContent = slug ? `https://${s}.${domain}` : '— ingresa el slug';
+}
+
+function renderMCPGrid() {
+  document.getElementById('mcp-grid').innerHTML = MCP_CATALOG.map(m => `
+    <div class="mcp-item ${activeMCP.has(m.id)?'on':''}" onclick="toggleMCP('${m.id}',this)" id="mitem-${m.id}">
+      <span style="font-size:17px">${m.icon}</span>
+      <div><div style="font-size:11px;font-weight:700">${m.name}</div><div style="font-size:9px;color:var(--t2);font-family:var(--fm)">${m.desc}</div></div>
+      <div class="toggle ${activeMCP.has(m.id)?'on':''}"></div>
+    </div>`).join('');
+}
+
+function toggleMCP(id, el) {
+  if(activeMCP.has(id)) activeMCP.delete(id); else activeMCP.add(id);
+  el.classList.toggle('on'); el.querySelector('.toggle').classList.toggle('on');
+  renderMCPCfg();
+}
+
+function renderMCPCfg() {
+  const area = document.getElementById('mcp-cfg');
+  const active = [...activeMCP];
+  if(!active.length) { area.innerHTML = `<div class="ftit">Tokens MCP</div><div style="font-size:12px;color:var(--t2);font-family:var(--fm)">// activa herramientas arriba</div>`; return; }
+  area.innerHTML = `<div class="ftit">Tokens MCP (${active.length} activos)</div>` +
+    active.map(id => { const m = MCP_CATALOG.find(x=>x.id===id); return `<div class="frow"><label class="flbl">${m.icon} ${m.name}</label><input class="fin" id="mcp-t-${id}" placeholder="Token OAuth / API key..." style="font-family:var(--fm);font-size:12px"></div>`; }).join('');
+}
+
+function fillP(type) {
+  const T = { agenda:'Eres {nombre}, {profesion}. Ayuda a los clientes a agendar citas usando Google Calendar. Pregunta nombre, fecha, hora y tipo de servicio.', faq:'Eres {nombre}, {profesion}. Responde preguntas frecuentes de forma clara y concisa. Si no sabes, di que contacten directamente.', ventas:'Eres {nombre}, {profesion}. Entiende las necesidades del cliente y cierra ventas consultivas con empatía.', asesor:'Eres {nombre}, {profesion}. Brinda asesoría experta en tu área. Escucha activamente y da recomendaciones basadas en evidencia.' };
+  document.getElementById('f-prompt').value = T[type];
+}
+
+function loadTemplate(t) {
+  showPage('create'); goStep(0);
+  const T = {
+    plomero:{name:'Juan Pérez',prof:'Plomero certificado',emoji:'👨‍🔧',svc:'Agenda Plomería JP',prompt:'Eres Juan Pérez, plomero certificado. Agenda citas, da presupuestos y responde sobre plomería.',mcp:['google-calendar','gmail']},
+    abogado:{name:'Dra. Ana Torres',prof:'Abogada penalista',emoji:'⚖️',svc:'Consultas Legales',prompt:'Eres Dra. Ana Torres, abogada penalista. Brinda orientación legal general. Tus respuestas son orientativas.',mcp:['google-calendar','google-sheets']},
+    medico:{name:'Dr. Carlos Mejía',prof:'Médico general',emoji:'🩺',svc:'Consultorio Virtual',prompt:'Eres asistente del Dr. Carlos Mejía. Agenda citas y responde preguntas de salud general. No des diagnósticos definitivos.',mcp:['google-calendar','gmail']},
+    dev:{name:'DevBot Pro',prof:'Senior Developer',emoji:'💻',svc:'Soporte Dev',prompt:'Eres senior developer experto en JS, Python, Docker. Responde con código limpio y mejores prácticas.',mcp:['github','wikipedia']},
+    coach:{name:'Luna Coach',prof:'Coach ejecutiva',emoji:'🎯',svc:'Coaching Luna',prompt:'Eres Luna, coach ejecutiva. Ayudas a identificar metas y diseñar planes de acción.',mcp:['google-calendar','gmail']}
+  };
+  const c = T[t];
+  document.getElementById('f-name').value=c.name;
+  document.getElementById('f-prof').value=c.prof;
+  document.getElementById('f-svc').value=c.svc;
+  document.getElementById('f-prompt').value=c.prompt;
+  selEmoji_ = c.emoji;
+  document.querySelectorAll('.eopt').forEach(x=>x.classList.toggle('sel',x.textContent.trim()===c.emoji));
+  activeMCP = new Set(c.mcp);
+  renderMCPGrid(); renderMCPCfg(); syncPreview();
+}
+
+// ── AGENT PACK GENERATOR (matches hologram-generic-ai-agent-vs v1.11.2 schema) ──
+function buildPack() {
+  const name     = document.getElementById('f-name')?.value    || 'Mi Agente';
+  const prof     = document.getElementById('f-prof')?.value    || '';
+  const svc      = document.getElementById('f-svc')?.value     || name;
+  const slug     = document.getElementById('f-slug')?.value    || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const prompt   = document.getElementById('f-prompt')?.value  || `Eres ${name}.`;
+  const greeting = document.getElementById('f-greeting')?.value|| `Hola, soy ${name}. ¿En qué te puedo ayudar?`;
+  const temp     = (parseFloat(document.getElementById('f-temp')?.value||7)/10).toFixed(1);
+  const maxTok   = document.getElementById('f-maxtok')?.value  || '1024';
+  const lang     = document.getElementById('f-lang')?.value    || 'es';
+  const cat      = document.getElementById('f-cat')?.value     || 'general';
+
+  // Map provider → env var names used in deployment.yaml chatbot.env section
+  // Note: config.env uses OPENAI_MODEL + OPENAI_BASE_URL for ALL providers (not just OpenAI)
+  let llmBase;
+  if      (selProvider_ === 'anthropic') llmBase = 'https://api.anthropic.com/v1/messages';
+  else if (selProvider_ === 'openai')    llmBase = 'https://api.openai.com/v1';
+  else                                   llmBase = 'http://ollama:11434/v1'; // default in config.env
+
+  const mcpLines = [...activeMCP].map(id => {
+    const m  = MCP_CATALOG.find(x => x.id === id);
+    const tk = document.getElementById(`mcp-t-${id}`)?.value || '';
+    return [
+      `  - type: url`,
+      `    url: "${m.url}"`,
+      `    name: "${m.id}"`,
+      `    tools: all`,
+      ...(tk ? [`    headers:`, `      Authorization: "Bearer ${tk}"`] : [])
+    ].join('\n');
+  }).join('\n');
+
+  const lines = [
+`# agent-pack.yaml — generado por PersonaOS`,
+`# Agente: ${name} | ${svc}`,
+`# Ruta destino: app/agent-packs/example-agent/agent-pack.yaml`,
+`# Schema: github.com/2060-io/hologram-generic-ai-agent-vs/blob/main/docs/agent-pack-schema.md`,
+``,
+`metadata:`,
+`  id: ${slug}`,
+`  displayName: "${name}"`,
+`  description: "${prof || svc}"`,
+`  defaultLanguage: ${lang}`,
+`  tags:`,
+`    - ${cat}`,
+``,
+`languages:`,
+`  ${lang}:`,
+`    greetingMessage: "${greeting}"`,
+`    systemPrompt: |`,
+`      ${prompt.split('\n').join('\n      ')}`,
+`    strings:`,
+`      CREDENTIAL: "Autenticar con credencial EAFIT"`,
+`      LOGOUT: "Cerrar sesión"`,
+`      WELCOME_BACK: "Bienvenido de nuevo, {userName}"`,
+`  en:`,
+`    greetingMessage: "Hello, I am ${name}. How can I help you?"`,
+`    systemPrompt: "You are ${name}, ${prof}."`,
+``,
+`# LLM — injected via deployment.yaml chatbot.env (LLM_PROVIDER / OPENAI_MODEL / OPENAI_BASE_URL)`,
+`llm:`,
+`  provider: \${LLM_PROVIDER}`,
+`  model: \${OPENAI_MODEL}`,
+`  baseUrl: \${OPENAI_BASE_URL}`,
+`  temperature: ${temp}`,
+`  maxTokens: ${maxTok}`,
+``,
+`# RAG — langchain + Redis vector store (VECTOR_INDEX_NAME in deployment.yaml)`,
+`rag:`,
+`  provider: langchain`,
+`  docsPath: \${RAG_DOCS_PATH}`,
+`  vectorStore:`,
+`    type: redis`,
+`    indexName: ${slug.replace(/-/g,'_')}`,
+``,
+`# Memory — Redis (REDIS_URL injected from deployment.yaml)`,
+`memory:`,
+`  backend: redis`,
+`  window: 20`,
+`  redisUrl: \${REDIS_URL}`,
+``,
+`# Flows — credential auth uses EAFIT Avatar AnonCreds credDef`,
+`flows:`,
+`  welcome:`,
+`    enabled: true`,
+`    sendOnProfile: true`,
+`    templateKey: greetingMessage`,
+`  authentication:`,
+`    enabled: true`,
+`    credentialDefinitionId: \${CREDENTIAL_DEFINITION_ID}`,
+`  menu:`,
+`    items:`,
+`      - id: authenticate`,
+`        labelKey: CREDENTIAL`,
+`        action: authenticate`,
+`        visibleWhen: unauthenticated`,
+`      - id: logout`,
+`        labelKey: LOGOUT`,
+`        action: logout`,
+`        visibleWhen: authenticated`,
+  ];
+
+  if (activeMCP.size > 0) {
+    lines.push(``, `# MCP services (mínimo 2 requeridos para el reto EAFIT)`, `mcp:`, `  servers:`, mcpLines);
+  }
+
+  lines.push(``, `# VS Agent + PostgreSQL (injected via deployment.yaml)`, `integrations:`, `  vsAgent:`, `    adminUrl: \${VS_AGENT_ADMIN_URL}`, `  postgres:`, `    host: \${POSTGRES_HOST}`, `    user: \${POSTGRES_USER}`, `    password: \${POSTGRES_PASSWORD}`, `    dbName: \${POSTGRES_DB_NAME}`);
+
+  return lines.join('\n');
+}
+
+function buildEnv() {
+  const name    = document.getElementById('f-name')?.value  || 'Mi Agente';
+  const slug    = document.getElementById('f-slug')?.value  || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const svc     = document.getElementById('f-svc')?.value   || name;
+  const prof    = document.getElementById('f-prof')?.value  || '';
+  const ns      = settings.ns     || 'eafit-TUEQUIPO';
+  const agName  = settings.agname || slug;            // maps to nameOverride in deployment.yaml
+  const domain  = settings.domain || 'team-c.teams.eafit.testnet.verana.network';
+
+  let llmProv = selProvider_, llmModel = selModel_, llmBase = '', keyLine = '';
+  if (selProvider_ === 'anthropic') {
+    llmBase = 'https://api.anthropic.com/v1/messages';
+    keyLine = `# Anthropic: set OPENAI_API_KEY to your sk-ant-... key\nOPENAI_API_KEY=\${ANTHROPIC_API_KEY}`;
+  } else if (selProvider_ === 'openai') {
+    llmBase = 'https://api.openai.com/v1';
+    keyLine = `OPENAI_API_KEY=\${OPENAI_API_KEY}`;
+  } else {
+    // Ollama — default in config.env, no key needed
+    llmBase = 'http://ollama:11434/v1';
+    keyLine = `# Ollama (default in config.env) — no API key required`;
+  }
+
+  // Matches exact structure of config.env from Danielsma803/eafit-challenge-agent-example
+  return `# =============================================================================
+# config.env — generado por PersonaOS
+# Agente: ${name} | ${svc}
+# Basado en: github.com/Danielsma803/eafit-challenge-agent-example/blob/main/config.env
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Agent public URL — formato: https://<agentname>.agents.<team>.teams.eafit.testnet.verana.network
+# ---------------------------------------------------------------------------
+AGENT_PUBLIC_URL=\${AGENT_PUBLIC_URL:-https://${slug}.agents.${domain}}
+
+# ---------------------------------------------------------------------------
+# Organization — parent service (eafit-challenge)
+# ---------------------------------------------------------------------------
+ORG_VS_PUBLIC_URL=\${ORG_VS_PUBLIC_URL:-https://organization.eafit.testnet.verana.network}
+ORG_VS_ADMIN_URL=\${ORG_VS_ADMIN_URL:-https://admin.organization.eafit.testnet.verana.network}
+
+# ---------------------------------------------------------------------------
+# VS Agent image and ports (local dev — different from org 3000/3001, avatar 3002/3003)
+# ---------------------------------------------------------------------------
+VS_AGENT_IMAGE=\${VS_AGENT_IMAGE:-veranalabs/vs-agent:latest}
+VS_AGENT_CONTAINER_NAME="${agName}"
+VS_AGENT_ADMIN_PORT="3010"
+VS_AGENT_PUBLIC_PORT="3011"
+
+# ---------------------------------------------------------------------------
+# Service details (appear in Service credential issued by org)
+# ---------------------------------------------------------------------------
+SERVICE_NAME="${svc}"
+SERVICE_TYPE="AIAgent"
+SERVICE_DESCRIPTION="${prof}"
+SERVICE_LOGO_URL="https://hologram.zone/images/github.svg"
+SERVICE_MIN_AGE="0"
+SERVICE_TERMS="https://verana.io/terms"
+SERVICE_PRIVACY="https://verana.io/privacy"
+
+# ---------------------------------------------------------------------------
+# Chatbot (hologram-generic-ai-agent-app v1.11.2)
+# ---------------------------------------------------------------------------
+CHATBOT_IMAGE=\${CHATBOT_IMAGE:-io2060/hologram-generic-ai-agent-app:v1.11.2}
+CHATBOT_PORT="3003"
+
+# LLM
+LLM_PROVIDER="${llmProv}"
+OPENAI_MODEL="${llmModel}"
+OPENAI_BASE_URL="${llmBase}"
+${keyLine}
+
+# RAG
+RAG_PROVIDER="langchain"
+RAG_DOCS_PATH="/app/rag/docs"
+
+# Memory
+AGENT_MEMORY_BACKEND="redis"
+AGENT_MEMORY_WINDOW="20"
+
+# ---------------------------------------------------------------------------
+# Credential authentication (EAFIT Avatar credDef — NO CAMBIAR)
+# ---------------------------------------------------------------------------
+CREDENTIAL_DEFINITION_ID="${CRED_DEF}"
+
+# GitHub MCP
+GITHUB_MCP_URL="https://api.githubcopilot.com/mcp/"
+MCP_CONFIG_ENCRYPTION_KEY=\${MCP_CONFIG_ENCRYPTION_KEY:-}
+
+# ---------------------------------------------------------------------------
+# PostgreSQL
+# ---------------------------------------------------------------------------
+POSTGRES_PASSWORD=\${POSTGRES_PASSWORD:-changeme}
+POSTGRES_USER="${slug.replace(/-/g,'_')}_db"
+POSTGRES_DB="${slug}"
+
+# ---------------------------------------------------------------------------
+# Kubernetes (deployment.yaml — nameOverride: "${agName}", domain: "${domain}")
+# K8S_NAMESPACE: ${ns}
+# ---------------------------------------------------------------------------
+LOG_LEVEL="info"
+`;
+}
+
+function renderPackPreview() {
+  const hl = s => s.replace(/^(#.*)$/gm,'<span style="color:#6E7681">$1</span>').replace(/^(\s*)([\w-]+)(:)/gm,'$1<span style="color:#79C0FF">$2</span>$3').replace(/"([^"]*)"/g,'<span style="color:#A8FF78">"$1"</span>').replace(/\${([^}]+)}/g,'<span style="color:#F4A836">${$1}</span>');
+  document.getElementById('pack-prev').innerHTML = hl(buildPack());
+  document.getElementById('env-prev').innerHTML = hl(buildEnv());
+}
+
+function copyPack() { navigator.clipboard.writeText(buildPack()).then(()=>toast('agent-pack.yaml copiado')); }
+function dlPack() { dl(buildPack(),'agent-pack.yaml','text/yaml'); }
+function dlEnv()  { dl(buildEnv(),'config.env','text/plain'); }
+function dl(content, filename, type) {
+  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([content],{type})),download:filename});
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ── SAVE BOT (POST to EAFIT Backend) ─────────────
+async function saveBot() {
+  const name = document.getElementById('f-name')?.value?.trim();
+  if(!name) { toast('⚠ Ingresa el nombre del agente'); goStep(0); return; }
+  const btn = document.getElementById('save-bot-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const slug = document.getElementById('f-slug')?.value?.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const payload = {
+    name,
+    profession: document.getElementById('f-prof')?.value || '',
+    description: document.getElementById('f-desc')?.value || '',
+    emoji: selEmoji_,
+    slug,
+    serviceName: document.getElementById('f-svc')?.value || name,
+    category: document.getElementById('f-cat')?.value || 'General',
+    isPublic: document.getElementById('f-public')?.value === 'true',
+    provider: selProvider_,
+    model: selModel_,
+    temperature: parseFloat(document.getElementById('f-temp')?.value||7)/10,
+    maxTokens: parseInt(document.getElementById('f-maxtok')?.value||1024),
+    language: document.getElementById('f-lang')?.value || 'es',
+    tone: document.getElementById('f-tone')?.value || 'profesional',
+    systemPrompt: document.getElementById('f-prompt')?.value || '',
+    greeting: document.getElementById('f-greeting')?.value || '',
+    mcpTools: [...activeMCP],
+  };
+  try {
+    const r = await apiFetch('/agents', { method:'POST', body: JSON.stringify(payload) });
+    const d = await r.json();
+    if(r.ok) {
+      toast('✓ Agente creado en el backend EAFIT');
+      bots.push(normalizeBot(d.agent || d));
+      renderBots();
+      ['f-name','f-prof','f-desc','f-svc','f-slug','f-prompt','f-greeting'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+      activeMCP.clear(); renderMCPGrid(); goStep(0); showPage('bots');
+    } else {
+      toast(`⚠ Error: ${d.message || r.statusText}`);
+    }
+  } catch(e) {
+    // Guardar localmente si el backend falla
+    const local = { ...payload, id: Date.now(), published: false, accent: ACCENTS[bots.length%ACCENTS.length] };
+    bots.push(normalizeBot(local));
+    localStorage.setItem('personaos_bots', JSON.stringify(bots));
+    renderBots();
+    toast('⚠ Backend no disponible — guardado localmente');
+    ['f-name','f-prof','f-desc','f-svc','f-slug','f-prompt','f-greeting'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    activeMCP.clear(); renderMCPGrid(); goStep(0); showPage('bots');
+  }
+  btn.disabled = false; btn.textContent = '✓ Guardar en EAFIT Backend';
+}
+
+// ═══════════════════════════════════════════════════
+// HOLOGRAM CONNECT
+// ═══════════════════════════════════════════════════
+function renderConnectPills() {
+  const el = document.getElementById('connect-pills');
+  el.innerHTML = bots.map(b => `<div class="apill ${connectAgent&&connectAgent.id===b.id?'sel':''}" onclick="selectConnect(${JSON.stringify(b.id)})">${b.emoji} ${b.name}${b.published?'<span class="ton tag" style="margin-left:4px">● live</span>':''}</div>`).join('') || '<span style="font-size:11px;color:var(--t2);font-family:var(--fm)">// crea agentes primero</span>';
+}
+
+function selectConnect(id) {
+  connectAgent = bots.find(x=>String(x.id)===String(id));
+  if(!connectAgent) return;
+  document.getElementById('hpanel').style.display='block';
+  document.getElementById('h-av').textContent=connectAgent.emoji;
+  document.getElementById('h-name').textContent=connectAgent.name;
+  document.getElementById('h-role').textContent=connectAgent.prof;
+  renderConnectPills();
+  updateHoloInfo();
+  if(connectAgent.published) startPoll();
+}
+
+function openConnect(id) { showPage('connect'); selectConnect(id); }
+
+function updateHoloInfo() {
+  if(!connectAgent) return;
+  const domain = settings.domain || 'agents.team-c.teams.eafit.testnet.verana.network';
+  const pubUrl = connectAgent.public_url || `https://${connectAgent.slug}.${domain}`;
+  const admin  = settings.vsadmin || 'http://localhost:3010';
+  document.getElementById('i-prov').textContent = provLabel(connectAgent.provider);
+  document.getElementById('i-model').textContent = connectAgent.model;
+  document.getElementById('i-mcp').textContent = connectAgent.mcp?.length ? connectAgent.mcp.join(', ') : 'Ninguno';
+  document.getElementById('i-url').textContent = connectAgent.published ? pubUrl : '— no publicado';
+  document.getElementById('i-admin').textContent = admin;
+  if(connectAgent.published) {
+    document.getElementById('i-status').textContent='Online'; document.getElementById('i-status').className='ival on';
+    document.getElementById('pub-btn').style.display='none'; document.getElementById('unpub-btn').style.display='';
+    document.getElementById('qrimg').src=`https://api.qrserver.com/v1/create-qr-code/?size=172x172&data=${encodeURIComponent(pubUrl)}`;
+    document.getElementById('qrimg').style.display='block'; document.getElementById('qrph').style.display='none';
+    document.getElementById('qrurl').style.display='block';
+    document.getElementById('qrurl').innerHTML=`<a href="${pubUrl}" target="_blank" style="color:var(--blue);text-decoration:none;word-break:break-all">${pubUrl}</a>`;
+  } else {
+    document.getElementById('i-status').textContent='Offline'; document.getElementById('i-status').className='ival off';
+    document.getElementById('pub-btn').style.display=''; document.getElementById('unpub-btn').style.display='none';
+    document.getElementById('qrimg').style.display='none'; document.getElementById('qrph').style.display='flex';
+    document.getElementById('qrurl').style.display='none';
+  }
+}
+
+function setDS(i, state) {
+  const el=document.getElementById(`ds${i}`); if(!el) return;
+  const icon = state==='done'?'✅':state==='active'?'⏳':'○';
+  const col  = state==='done'?'var(--green)':state==='active'?'var(--amber)':'var(--t1)';
+  el.innerHTML=`<span>${icon}</span> <span style="font-size:11px;color:${col}">${el.querySelector('span:last-child')?.textContent||''}</span>`;
+}
+
+async function refreshStatus() {
+  if (!connectAgent) return;
+  // Local dev ports from config.env: VS_AGENT_ADMIN_PORT=3010, CHATBOT_PORT=3003
+  // K8s ports from deployment.yaml: vs-agent adminPort=3000, chatbot APP_PORT=3003
+  const admin = settings.vsadmin || 'http://localhost:3010';
+  // Derive chatbot URL — always port 3003 regardless of environment
+  const chatbotUrl = admin.replace(/:\d+$/, ':3003').replace('localhost:3010','localhost:3003').replace('localhost:3000','localhost:3003');
+
+  document.getElementById('h-dot').className = 'hdot pend';
+  document.getElementById('h-stxt').textContent = 'verificando...';
+  try {
+    const r = await fetch(`${admin}/agent-info`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const data = await r.json().catch(() => ({}));
+      document.getElementById('h-dot').className = 'hdot on';
+      document.getElementById('h-stxt').textContent = `VS Agent activo · ${admin}`;
+      setDS(0,'done'); setDS(1,'done');
+      setDS(2, (connectAgent.published || data.invitationUrl) ? 'done' : 'active');
+    } else throw new Error('not ok');
+  } catch {
+    try {
+      const r2 = await fetch(`${chatbotUrl}/health`, { signal: AbortSignal.timeout(2000) });
+      if (r2.ok) {
+        document.getElementById('h-dot').className = 'hdot on';
+        document.getElementById('h-stxt').textContent = 'Chatbot activo (puerto 3003)';
+        setDS(1,'done');
+      } else throw new Error();
+    } catch {
+      document.getElementById('h-dot').className = 'hdot';
+      document.getElementById('h-stxt').textContent = 'agente offline';
+    }
+  }
+}
+
+function startPoll() { clearInterval(pollTimer); refreshStatus(); pollTimer=setInterval(refreshStatus,15000); }
+
+async function publishBot() {
+  if(!connectAgent) return;
+  setDS(0,'active');
+  // Call EAFIT backend to publish
+  try {
+    const r = await apiFetch(`/agents/${connectAgent.id}/publish`, {method:'POST'});
+    const d = await r.json();
+    if(r.ok) {
+      connectAgent.published = true;
+      if(d.publicUrl || d.public_url) connectAgent.public_url = d.publicUrl || d.public_url;
+      toast('✓ Agente publicado en Hologram');
+    }
+  } catch(_) { connectAgent.published = true; }
+  bots = bots.map(b => String(b.id)===String(connectAgent.id)?{...b,...connectAgent}:b);
+  renderBots(); renderConnectPills(); updateHoloInfo();
+  [0,1,2,3].forEach((i,idx)=>setTimeout(()=>setDS(i,'done'),(idx+1)*600));
+  setTimeout(startPoll,2500);
+}
+
+async function unpublishBot() {
+  if(!connectAgent) return;
+  try {
+    await apiFetch(`/agents/${connectAgent.id}/unpublish`, {method:'POST'});
+  } catch(_) {}
+  connectAgent.published = false;
+  bots = bots.map(b => String(b.id)===String(connectAgent.id)?{...b,published:false}:b);
+  renderBots(); renderConnectPills(); updateHoloInfo();
+  clearInterval(pollTimer);
+  [0,1,2,3,4].forEach(i=>setDS(i,''));
+  document.getElementById('h-dot').className='hdot';
+  document.getElementById('h-stxt').textContent='offline';
+  toast('Bot despublicado');
+}
+
+// ═══════════════════════════════════════════════════
+// CHAT DIRECTO (API)
+// ═══════════════════════════════════════════════════
+function renderAgentPills() {
+  document.getElementById('agent-pills').innerHTML = bots.map(b=>`<div class="apill ${chatAgent&&String(chatAgent.id)===String(b.id)?'sel':''}" onclick="selectAgent(${JSON.stringify(b.id)})">${b.emoji} ${b.name}</div>`).join('') || '<span style="font-size:11px;color:var(--t2);font-family:var(--fm)">// crea agentes primero</span>';
+}
+
+function selectAgent(id) {
+  chatAgent = bots.find(x=>String(x.id)===String(id));
+  chatHistory = [];
+  document.getElementById('cv-av').textContent = chatAgent.emoji;
+  document.getElementById('cv-name').textContent = chatAgent.name;
+  document.getElementById('cv-role').textContent = chatAgent.prof;
+  renderAgentPills();
+  const g = chatAgent.greeting || `Hola, soy ${chatAgent.name}.`;
+  document.getElementById('chat-msgs').innerHTML = `<div class="ma"><div class="ba">${escH(g)}</div><div class="mt">ahora</div></div>`;
+  chatHistory = [{role:'user',content:`Saluda como ${chatAgent.name}.`},{role:'assistant',content:g}];
+}
+
+function openChatBot(id) { showPage('chat'); selectAgent(id); }
+
+async function sendMsg() {
+  if(!chatAgent){alert('Selecciona un agente');return;}
+  const input = document.getElementById('chat-in');
+  const text = input.value.trim(); if(!text) return;
+  input.value = '';
+  const btn = document.getElementById('send-btn'); btn.disabled=true;
+  const msgs = document.getElementById('chat-msgs');
+  const now = new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  msgs.innerHTML += `<div class="mu"><div class="bu">${escH(text)}</div><div class="mt">${now}</div></div>`;
+  const lid='l'+Date.now();
+  msgs.innerHTML += `<div class="ma" id="${lid}"><div class="ba"><span class="typing"><span></span><span></span><span></span></span></div></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  chatHistory.push({role:'user',content:text});
+
+  // 1st try: EAFIT backend chat endpoint
+  try {
+    const r = await apiFetch(`/agents/${chatAgent.id}/chat`, {method:'POST', body:JSON.stringify({message:text,history:chatHistory.slice(-10)})});
+    if(r.ok) {
+      const d = await r.json();
+      const reply = d.reply || d.message || d.content || 'Sin respuesta.';
+      chatHistory.push({role:'assistant',content:reply});
+      finish(lid,reply,now,msgs,btn);
+      return;
+    }
+  } catch(_) {}
+
+  // 2nd try: direct LLM call
+  const ant = settings.ant || '';
+  const oai = settings.oai || '';
+  try {
+    let reply='';
+    if(chatAgent.provider==='anthropic'&&ant) {
+      const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ant,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:chatAgent.model,max_tokens:chatAgent.maxTokens,system:chatAgent.prompt,messages:chatHistory.slice(-12)})});
+      const d = await r.json(); reply = d.content?.[0]?.text||'Error.';
+    } else if(chatAgent.provider==='openai'&&oai) {
+      const r = await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+oai},body:JSON.stringify({model:chatAgent.model,max_tokens:chatAgent.maxTokens,messages:[{role:'system',content:chatAgent.prompt},...chatHistory.slice(-12)]})});
+      const d = await r.json(); reply = d.choices?.[0]?.message?.content||'Error.';
+    } else if(chatAgent.provider==='ollama') {
+      const base = settings.ollama||'http://localhost:11434';
+      const r = await fetch(`${base}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:chatAgent.model,stream:false,messages:[{role:'system',content:chatAgent.prompt},...chatHistory.slice(-12)]})});
+      const d = await r.json(); reply = d.message?.content||'Verifica Ollama.';
+    } else {
+      reply = `⚠️ Configura la API key de ${chatAgent.provider} en ⚙ Configuración.\n\nModelo: ${chatAgent.model}`;
+    }
+    chatHistory.push({role:'assistant',content:reply});
+    finish(lid,reply,now,msgs,btn);
+  } catch(e) {
+    finish(lid,`Error de conexión: ${e.message}`,now,msgs,btn,true);
+  }
+}
+
+function finish(lid,reply,now,msgs,btn,err=false) {
+  const el=document.getElementById(lid);
+  if(el) el.outerHTML=`<div class="ma"><div class="ba" ${err?'style="color:var(--t2)"':''}>${escH(reply).replace(/\n/g,'<br>')}</div><div class="mt">${now}</div></div>`;
+  msgs.scrollTop=msgs.scrollHeight; btn.disabled=false;
+  document.getElementById('chat-in').focus();
+}
+
+// ═══════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════
+function loadSettings() {
+  settings = JSON.parse(localStorage.getItem('personaos_settings')||'{}');
+  const map = {token:'s-token',ant:'s-ant',oai:'s-oai',ollama:'s-ollama',ns:'s-ns',agname:'s-agname',domain:'s-domain',vsadmin:'s-vsadmin'};
+  for(const [k,id] of Object.entries(map)) { const el=document.getElementById(id); if(el&&settings[k]) el.value=settings[k]; }
+}
+function saveSettings() {
+  const map = {token:'s-token',ant:'s-ant',oai:'s-oai',ollama:'s-ollama',ns:'s-ns',agname:'s-agname',domain:'s-domain',vsadmin:'s-vsadmin'};
+  for(const [k,id] of Object.entries(map)) { const el=document.getElementById(id); if(el) settings[k]=el.value; }
+  if(settings.token) jwtToken = settings.token;
+  localStorage.setItem('personaos_settings',JSON.stringify(settings));
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg, ms=3000) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════════
+// BOOTSTRAP
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
